@@ -1,4 +1,9 @@
+''''by michelle'''
+#def意义为储存长变量为一个值
+
+
 # Import required modules
+#import可以引用python自带功能库
 import sqlite3
 import os
 import random
@@ -6,22 +11,24 @@ import random
 # Database file path
 DB_PATH = "game.db"
 
-# Game genre corresponding letter selection dictionary
+# Game genre corresponding letter selection
+#用于Game Database System问题2
 TYPE_DICT = {
-    "A": "Action",        # Action games
-    "B": "RPG",           # Role-playing games
-    "C": "FPS",           # First-person shooter games
-    "D": "Simulation",    # Simulation games
-    "E": "Adventure",     # Adventure games
-    "F": "Strategy",      # Strategy games
-    "G": "Racing",        # Racing games
-    "H": "Horror",        # Horror games
-    "I": "Party",         # Casual party games
-    "J": "Sandbox",       # Sandbox games
-    "K": "UGC Platform"   # UGC creation platform games (for Roblox)
+    "A": "Action", 
+    "B": "RPG",      
+    "C": "FPS", 
+    "D": "Simulation", 
+    "E": "Adventure", 
+    "F": "Strategy", 
+    "G": "Racing", 
+    "H": "Horror", 
+    "I": "Party", 
+    "J": "Sandbox", 
+    "K": "UGC Platform" 
 }
 
 # Establish connection with SQLite database
+#跟着ai新学的用来保证安全打开db的代码+连接数据库
 def connect_db():
     # Check if database file exists
     if not os.path.exists(DB_PATH):
@@ -33,7 +40,9 @@ def connect_db():
     conn.row_factory = sqlite3.Row
     return conn
 
+
 # Format single game information output with aligned layout
+#ljust用来打空格，为了对准每一列
 def print_game_info(game):
     name = game["name"].ljust(35)[:35]
     plat = game["platform"].ljust(18)[:18]
@@ -42,11 +51,14 @@ def print_game_info(game):
     score = f"{game['rating']}".ljust(5)
     print(f"| {name} | {plat} | {genre} | {year} | Score:{score} |")
 
+
 # Print formatted table header
+#表头
 def print_table_head():
     print("-" * 110)
     print(f"| Game Name".ljust(37) + "| Platform".ljust(20) + "| Genre".ljust(17) + "| Release Year | Rating |")
     print("-" * 110)
+
 
 # Function 1: Query and display all games in database
 def show_all_games():
@@ -66,6 +78,7 @@ def show_all_games():
     # Count total game quantity
     print(f"✅ Total: {len(data)} games")
     conn.close()
+
 
 # Function 2: Filter games by selected genre via letters
 def choose_type_filter():
@@ -97,6 +110,7 @@ def choose_type_filter():
     print(f"✅ Total: {len(res)} games")
     conn.close()
 
+
 # Function 3: Sort games by release year from oldest to newest
 def sort_by_year_asc():
     conn = connect_db()
@@ -110,6 +124,7 @@ def sort_by_year_asc():
     print("-" * 110)
     conn.close()
 
+
 # Function 4: Sort games by rating from highest to lowest
 def sort_by_rating_desc():
     conn = connect_db()
@@ -122,6 +137,7 @@ def sort_by_rating_desc():
         print_game_info(g)
     print("-" * 110)
     conn.close()
+
 
 # Function 5: Filter games by operating platform
 def filter_platform():
@@ -142,12 +158,14 @@ def filter_platform():
     print(f"✅ Total: {len(res)} games")
     conn.close()
 
+
 # New Added Function 6: Preference Quiz Game & Smart Game Recommendation
 def game_preference_quiz():
     print("\n=====================================")
     print("🎮 Game Hobby Test & Recommendation")
     print("Answer simple questions, I will match suitable games for you!")
     print("=====================================")
+
 
     # Record user favorite genre tags
     user_like = []
@@ -181,6 +199,7 @@ def game_preference_quiz():
     elif ans2 == "3":
         user_like.append("RPG")
 
+
     # Question 3: Preferred play time
     print("\nQ3. How long do you usually play games each time?")
     print("1. Short casual game within 1 hour")
@@ -191,10 +210,12 @@ def game_preference_quiz():
     elif ans3 == "2":
         user_like.append("Adventure")
 
+
     # Remove duplicate preference tags
     user_like = list(set(user_like))
     print(f"\n✅ Your favorite game types: {', '.join(user_like)}")
     print("🔍 Now matching suitable games for you...\n")
+
 
     # Connect database to query matching games
     conn = connect_db()
@@ -207,7 +228,9 @@ def game_preference_quiz():
     
     # Randomly pick up to 8 recommended games
     if recommend_games:
+        #游戏随机排列random
         random.shuffle(recommend_games)
+        #[:8]类似于只提取前八
         final_rec = recommend_games[:8]
         print_table_head()
         for game in final_rec:
@@ -217,6 +240,7 @@ def game_preference_quiz():
     else:
         print("😥 No matching games found, try other preferences next time!")
     conn.close()
+
 
 # Main menu core logic
 def main():
@@ -243,10 +267,11 @@ def main():
         elif op == "6":
             game_preference_quiz()
         elif op == "0":
-            print("👋 Program exited.")
+            print("👋 Program exited, thanks for using.")
             break
         else:
             print("⚠️ Wrong input, please try again!")
+
 
 # Program entry execution
 if __name__ == "__main__":
