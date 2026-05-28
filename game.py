@@ -1,5 +1,6 @@
-''''by michelle'''
-#def意义为储存长变量为一个值
+''''by michelle 11DTP'''
+#SQLite自带了大小写转换，十分之方便
+#return意为直接结束函数，避免连接失败后代码持续报错
 
 
 # Import required modules
@@ -9,7 +10,18 @@ import os
 import random
 
 # Database file path
-DB_PATH = "game.db"
+DB_PATH = "game.db
+
+
+# Menu option constants
+#用于main
+OP_VIEW_ALL = "1"
+OP_FILTER_GENRE = "2"
+OP_SORT_YEAR = "3"
+OP_SORT_RATING = "4"
+OP_FILTER_PLATFORM = "5"
+OP_QUIZ_RECOMMEND = "6"
+OP_EXIT = "0"
 
 # Game genre corresponding letter selection
 #用于Game Database System问题2
@@ -31,6 +43,8 @@ TYPE_DICT = {
 #跟着ai新学的用来保证安全打开db的代码+连接数据库
 def connect_db():
     # Check if database file exists
+    #os是python的模块，检查DB_PATH路径下的文件是否存在，path为os的子模块，处理路径相关的操作
+    #exists是os.path里的一个函数，如果这个路径在就true，不在就false
     if not os.path.exists(DB_PATH):
         print("❌ data not found!")
         return None
@@ -47,6 +61,7 @@ def print_game_info(game):
     name = game["name"].ljust(35)[:35]
     plat = game["platform"].ljust(18)[:18]
     genre = game["genre"].ljust(15)[:15]
+    #str转化字符为数字
     year = str(game["release_year"]).ljust(6)
     score = f"{game['rating']}".ljust(5)
     print(f"| {name} | {plat} | {genre} | {year} | Score:{score} |")
@@ -65,9 +80,11 @@ def show_all_games():
     conn = connect_db()
     if not conn:
         return
+    #cursor游标，执行sql指令用
     cur = conn.cursor()
     # Query all data sorted by id
     cur.execute("SELECT * FROM game ORDER BY id")
+    #fetchall把所有查询结果一次性输出
     data = cur.fetchall()
     print("\n📋 Full Game List")
     print_table_head()
@@ -84,6 +101,7 @@ def show_all_games():
 def choose_type_filter():
     print("\n🎮 Select Game Genre")
     # Print all selectable genres and corresponding letters
+    #键k, 值v，代表一个键A 一个值RPG，etc.
     for k, v in TYPE_DICT.items():
         print(f"【{k}】{v}")
     # Get user input letter
@@ -96,6 +114,7 @@ def choose_type_filter():
     conn = connect_db()
     cur = conn.cursor()
     # Fuzzy match games of target genre
+    #在sql里，LIKE？%{target}%用来模糊搜索，通配符
     cur.execute("SELECT * FROM game WHERE genre LIKE ?", (f"%{target}%",))
     res = cur.fetchall()
     print(f"\n📂 Genre: {target}")
@@ -169,6 +188,20 @@ def game_preference_quiz():
 
     # Record user favorite genre tags
     user_like = []
+    # Question 1 constants
+    Q1_COMBAT = "1"
+    Q1_CASUAL = "2"
+    Q1_STRATEGY = "3"
+    Q1_STORY = "4"
+
+    # Question 2 constants
+    Q2_INTENSE = "1"
+    Q2_PEACEFUL = "2"
+    Q2_MYSTERIOUS = "3"
+
+    # Question 3 constants
+    Q3_SHORT = "1"
+    Q3_LONG = "2"
 
     # Question 1: Favorite game style
     print("\nQ1. Which game style do you prefer most?")
@@ -177,13 +210,13 @@ def game_preference_quiz():
     print("3. Brainy strategy & puzzle")
     print("4. Immersive story & adventure")
     ans1 = input("Enter your choice number: ")
-    if ans1 == "1":
+    if ans1 == Q1_COMBAT:
         user_like.extend(["Action","FPS","Horror"])
-    elif ans1 == "2":
+    elif ans1 == Q1_CASUAL:
         user_like.extend(["Simulation","Sandbox","UGC Platform"])
-    elif ans1 == "3":
+    elif ans1 == Q1_STRATEGY:
         user_like.extend(["Strategy","Racing"])
-    elif ans1 == "4":
+    elif ans1 == Q1_STORY:
         user_like.extend(["RPG","Adventure"])
 
     # Question 2: Preferred game atmosphere
@@ -192,30 +225,28 @@ def game_preference_quiz():
     print("2. Peaceful and comfortable")
     print("3. Mysterious and fantasy")
     ans2 = input("Enter your choice number: ")
-    if ans2 == "1":
+    if ans2 == Q2_INTENSE:
         user_like.append("FPS")
-    elif ans2 == "2":
+    elif ans2 == Q2_PEACEFUL:
         user_like.append("Simulation")
-    elif ans2 == "3":
+    elif ans2 == Q2_MYSTERIOUS:
         user_like.append("RPG")
-
 
     # Question 3: Preferred play time
     print("\nQ3. How long do you usually play games each time?")
     print("1. Short casual game within 1 hour")
     print("2. Long immersive game over 3 hours")
     ans3 = input("Enter your choice number: ")
-    if ans3 == "1":
+    if ans3 == Q3_SHORT:
         user_like.append("Party")
-    elif ans3 == "2":
+    elif ans3 == Q3_LONG:
         user_like.append("Adventure")
-
+    
 
     # Remove duplicate preference tags
     user_like = list(set(user_like))
     print(f"\n✅ Your favorite game types: {', '.join(user_like)}")
     print("🔍 Now matching suitable games for you...\n")
-
 
     # Connect database to query matching games
     conn = connect_db()
@@ -246,33 +277,33 @@ def game_preference_quiz():
 def main():
     while True:
         print("\n========== Game Database System ==========")
-        print("1. View all games")                # Check all games
-        print("2. Filter by game genre")           # Filter by game type
+        print("1. View all games")                  # Check all games
+        print("2. Filter by game genre")            # Filter by game type
         print("3. Sort by release year (ascending)")# Sort by release year
         print("4. Sort by rating (descending)")     # Sort by score
-        print("5. Filter by platform")             # Filter by device platform
-        print("6. Hobby Quiz & Game Recommend")    # New: Preference quiz + smart recommendation
-        print("0. Exit program")                   # Exit program
+        print("5. Filter by platform")              # Filter by device platform
+        print("6. Hobby Quiz & Game Recommend")     # New: Preference quiz + smart recommendation
+        print("0. Exit program")                    # Exit program
         op = input("Enter option number: ").strip()
-        if op == "1":
+        if op == OP_VIEW_ALL:
             show_all_games()
-        elif op == "2":
+        elif op == OP_FILTER_GENRE:
             choose_type_filter()
-        elif op == "3":
+        elif op == OP_SORT_YEAR:
             sort_by_year_asc()
-        elif op == "4":
+        elif op == OP_SORT_RATING:
             sort_by_rating_desc()
-        elif op == "5":
+        elif op == OP_FILTER_PLATFORM:
             filter_platform()
-        elif op == "6":
+        elif op == OP_QUIZ_RECOMMEND:
             game_preference_quiz()
-        elif op == "0":
+        elif op == OP_EXIT:
             print("👋 Program exited, thanks for using.")
             break
         else:
-            print("⚠️ Wrong input, please try again!")
-
+            print("⚠️ Please enter a valid option!")
 
 # Program entry execution
+#用来启动整个程序
 if __name__ == "__main__":
     main()
