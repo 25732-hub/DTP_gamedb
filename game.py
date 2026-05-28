@@ -58,13 +58,13 @@ def connect_db():
 # Format single game information output with aligned layout
 #ljust用来打空格，为了对准每一列
 def print_game_info(game):
-    name = game["name"].ljust(35)[:35]
-    plat = game["platform"].ljust(18)[:18]
-    genre = game["genre"].ljust(15)[:15]
+    game_name = game["name"].ljust(35)[:35]
+    game_platform = game["platform"].ljust(18)[:18]
+    game_genre = game["genre"].ljust(15)[:15]
     #str转化字符为数字
-    year = str(game["release_year"]).ljust(6)
-    score = f"{game['rating']}".ljust(5)
-    print(f"| {name} | {plat} | {genre} | {year} | Score:{score} |")
+    release_year = str(game["release_year"]).ljust(6)
+    game_rating = f"{game['rating']}".ljust(5)
+    print(f"| {game_name} | {game_platform} | {game_genre} | {release_year} | Score:{game_rating} |")
 
 
 # Print formatted table header
@@ -81,19 +81,19 @@ def show_all_games():
     if not conn:
         return
     #cursor游标，执行sql指令用
-    cur = conn.cursor()
+    cursor = conn.cursor()
     # Query all data sorted by id
-    cur.execute("SELECT * FROM game ORDER BY id")
+    cursor.execute("SELECT * FROM game ORDER BY id")
     #fetchall把所有查询结果一次性输出
-    data = cur.fetchall()
+    all_games_data = cursor.fetchall()
     print("\n📋 Full Game List")
     print_table_head()
     # Loop to print all game info
-    for item in data:
-        print_game_info(item)
+    for game_item in all_games_data:
+        print_game_info(game_item)
     print("-" * 110)
     # Count total game quantity
-    print(f"✅ Total: {len(data)} games")
+    print(f"✅ Total: {len(all_games_data)} games")
     conn.close()
 
 
@@ -101,45 +101,45 @@ def show_all_games():
 def choose_type_filter():
     print("\n🎮 Select Game Genre")
     # Print all selectable genres and corresponding letters
-    #键k, 值v，代表一个键A 一个值RPG，etc.
-    for k, v in TYPE_DICT.items():
-        print(f"【{k}】{v}")
+    #键genre_key, 值genre_value，代表一个键A 一个值RPG，etc.
+    for genre_key, genre_value in TYPE_DICT.items():
+        print(f"【{genre_key}】{genre_value}")
     # Get user input letter
-    sel = input("Enter letter: ").strip().upper()
+    selected_genre_letter = input("Enter letter: ").strip().upper()
     # Verify valid input
-    if sel not in TYPE_DICT:
+    if selected_genre_letter not in TYPE_DICT:
         print("⚠️ Invalid category!")
         return
-    target = TYPE_DICT[sel]
+    target_genre = TYPE_DICT[selected_genre_letter]
     conn = connect_db()
-    cur = conn.cursor()
+    cursor = conn.cursor()
     # Fuzzy match games of target genre
     #在sql里，LIKE？%{target}%用来模糊搜索，通配符
-    cur.execute("SELECT * FROM game WHERE genre LIKE ?", (f"%{target}%",))
-    res = cur.fetchall()
-    print(f"\n📂 Genre: {target}")
+    cursor.execute("SELECT * FROM game WHERE genre LIKE ?", (f"%{target_genre}%",))
+    filtered_genre_games = cursor.fetchall()
+    print(f"\n📂 Genre: {target_genre}")
     print_table_head()
     # Check empty query result
-    if not res:
+    if not filtered_genre_games:
         print("| No games in this category".ljust(108) + "|")
     else:
-        for g in res:
-            print_game_info(g)
+        for game in filtered_genre_games:
+            print_game_info(game)
     print("-" * 110)
-    print(f"✅ Total: {len(res)} games")
+    print(f"✅ Total: {len(filtered_genre_games)} games")
     conn.close()
 
 
 # Function 3: Sort games by release year from oldest to newest
 def sort_by_year_asc():
     conn = connect_db()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM game ORDER BY release_year ASC")
-    data = cur.fetchall()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM game ORDER BY release_year ASC")
+    sorted_year_games = cursor.fetchall()
     print("\n📅 Sort by Release Year (Oldest to Newest)")
     print_table_head()
-    for g in data:
-        print_game_info(g)
+    for game in sorted_year_games:
+        print_game_info(game)
     print("-" * 110)
     conn.close()
 
@@ -147,13 +147,13 @@ def sort_by_year_asc():
 # Function 4: Sort games by rating from highest to lowest
 def sort_by_rating_desc():
     conn = connect_db()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM game ORDER BY rating DESC")
-    data = cur.fetchall()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM game ORDER BY rating DESC")
+    sorted_rating_games = cursor.fetchall()
     print("\n⭐ Sort by Rating (Highest to Lowest)")
     print_table_head()
-    for g in data:
-        print_game_info(g)
+    for game in sorted_rating_games:
+        print_game_info(game)
     print("-" * 110)
     conn.close()
 
@@ -161,20 +161,20 @@ def sort_by_rating_desc():
 # Function 5: Filter games by operating platform
 def filter_platform():
     print("\n💻 Available: PC / Switch / PS5 / Xbox / Mobile")
-    p = input("Enter platform name: ").strip()
+    target_platform = input("Enter platform name: ").strip()
     conn = connect_db()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM game WHERE platform LIKE ?", (f"%{p}%",))
-    res = cur.fetchall()
-    print(f"\n🔎 Platform: {p}")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM game WHERE platform LIKE ?", (f"%{target_platform}%",))
+    filtered_platform_games = cursor.fetchall()
+    print(f"\n🔎 Platform: {target_platform}")
     print_table_head()
-    if not res:
+    if not filtered_platform_games:
         print("| No games found".ljust(108) + "|")
     else:
-        for g in res:
-            print_game_info(g)
+        for game in filtered_platform_games:
+            print_game_info(game)
     print("-" * 110)
-    print(f"✅ Total: {len(res)} games")
+    print(f"✅ Total: {len(filtered_platform_games)} games")
     conn.close()
 
 
@@ -187,7 +187,7 @@ def game_preference_quiz():
 
 
     # Record user favorite genre tags
-    user_like = []
+    user_favorite_genres = []
     # Question 1 constants
     Q1_COMBAT = "1"
     Q1_CASUAL = "2"
@@ -209,62 +209,63 @@ def game_preference_quiz():
     print("2. Relaxing casual & creation")
     print("3. Brainy strategy & puzzle")
     print("4. Immersive story & adventure")
-    ans1 = input("Enter your choice number: ")
-    if ans1 == Q1_COMBAT:
-        user_like.extend(["Action","FPS","Horror"])
-    elif ans1 == Q1_CASUAL:
-        user_like.extend(["Simulation","Sandbox","UGC Platform"])
-    elif ans1 == Q1_STRATEGY:
-        user_like.extend(["Strategy","Racing"])
-    elif ans1 == Q1_STORY:
-        user_like.extend(["RPG","Adventure"])
+    question1_answer = input("Enter your choice number: ")
+    if question1_answer == Q1_COMBAT:
+        user_favorite_genres.extend(["Action","FPS","Horror"])
+    elif question1_answer == Q1_CASUAL:
+        user_favorite_genres.extend(["Simulation","Sandbox","UGC Platform"])
+    elif question1_answer == Q1_STRATEGY:
+        user_favorite_genres.extend(["Strategy","Racing"])
+    elif question1_answer == Q1_STORY:
+        user_favorite_genres.extend(["RPG","Adventure"])
 
     # Question 2: Preferred game atmosphere
     print("\nQ2. What game atmosphere do you like?")
     print("1. Intense and thrilling")
     print("2. Peaceful and comfortable")
     print("3. Mysterious and fantasy")
-    ans2 = input("Enter your choice number: ")
-    if ans2 == Q2_INTENSE:
-        user_like.append("FPS")
-    elif ans2 == Q2_PEACEFUL:
-        user_like.append("Simulation")
-    elif ans2 == Q2_MYSTERIOUS:
-        user_like.append("RPG")
+    question2_answer = input("Enter your choice number: ")
+    if question2_answer == Q2_INTENSE:
+        user_favorite_genres.append("FPS")
+    elif question2_answer == Q2_PEACEFUL:
+        user_favorite_genres.append("Simulation")
+    elif question2_answer == Q2_MYSTERIOUS:
+        user_favorite_genres.append("RPG")
 
     # Question 3: Preferred play time
     print("\nQ3. How long do you usually play games each time?")
     print("1. Short casual game within 1 hour")
     print("2. Long immersive game over 3 hours")
-    ans3 = input("Enter your choice number: ")
-    if ans3 == Q3_SHORT:
-        user_like.append("Party")
-    elif ans3 == Q3_LONG:
-        user_like.append("Adventure")
+    question3_answer = input("Enter your choice number: ")
+    if question3_answer == Q3_SHORT:
+        user_favorite_genres.append("Party")
+    elif question3_answer == Q3_LONG:
+        user_favorite_genres.append("Adventure")
     
 
     # Remove duplicate preference tags
-    user_like = list(set(user_like))
-    print(f"\n✅ Your favorite game types: {', '.join(user_like)}")
+    user_favorite_genres = list(set(user_favorite_genres))
+    print(f"\n✅ Your favorite game types: {', '.join(user_favorite_genres)}")
     print("🔍 Now matching suitable games for you...\n")
 
     # Connect database to query matching games
     conn = connect_db()
-    cur = conn.cursor()
-    recommend_games = []
+    cursor = conn.cursor()
+    recommended_games_list = []
     # Match all user preferred genres
-    for tag in user_like:
-        cur.execute("SELECT * FROM game WHERE genre LIKE ?",(f"%{tag}%",))
-        recommend_games.extend(cur.fetchall())
+    for genre_tag in user_favorite_genres:
+        #extend将多个元素加入一个列表
+        cursor.execute("SELECT * FROM game WHERE genre LIKE ?",(f"%{genre_tag}%",))
+        recommended_games_list.extend(cursor.fetchall())
     
     # Randomly pick up to 8 recommended games
-    if recommend_games:
-        #游戏随机排列random
-        random.shuffle(recommend_games)
+    if recommended_games_list:
+        #游戏随机排列random.shuffle
+        random.shuffle(recommended_games_list)
         #[:8]类似于只提取前八
-        final_rec = recommend_games[:8]
+        final_recommended_games = recommended_games_list[:8]
         print_table_head()
-        for game in final_rec:
+        for game in final_recommended_games:
             print_game_info(game)
         print("-" * 110)
         print("🎊 These games are highly suitable for you!")
@@ -284,20 +285,20 @@ def main():
         print("5. Filter by platform")              # Filter by device platform
         print("6. Hobby Quiz & Game Recommend")     # New: Preference quiz + smart recommendation
         print("0. Exit program")                    # Exit program
-        op = input("Enter option number: ").strip()
-        if op == OP_VIEW_ALL:
+        selected_option = input("Enter option number: ").strip()
+        if selected_option == OP_VIEW_ALL:
             show_all_games()
-        elif op == OP_FILTER_GENRE:
+        elif selected_option == OP_FILTER_GENRE:
             choose_type_filter()
-        elif op == OP_SORT_YEAR:
+        elif selected_option == OP_SORT_YEAR:
             sort_by_year_asc()
-        elif op == OP_SORT_RATING:
+        elif selected_option == OP_SORT_RATING:
             sort_by_rating_desc()
-        elif op == OP_FILTER_PLATFORM:
+        elif selected_option == OP_FILTER_PLATFORM:
             filter_platform()
-        elif op == OP_QUIZ_RECOMMEND:
+        elif selected_option == OP_QUIZ_RECOMMEND:
             game_preference_quiz()
-        elif op == OP_EXIT:
+        elif selected_option == OP_EXIT:
             print("👋 Program exited, thanks for using.")
             break
         else:
