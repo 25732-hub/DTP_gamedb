@@ -10,7 +10,7 @@ import os
 import random
 
 # Database file path
-DB_PATH = "game.db
+DB_PATH = "game.db"
 
 
 # Menu option constants
