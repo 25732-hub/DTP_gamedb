@@ -244,6 +244,7 @@ def game_preference_quiz():
     
 
     # Remove duplicate preference tags
+    #去重
     user_favorite_genres = list(set(user_favorite_genres))
     print(f"\n✅ Your favorite game types: {', '.join(user_favorite_genres)}")
     print("🔍 Now matching suitable games for you...\n")
